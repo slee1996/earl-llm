@@ -6,7 +6,7 @@ This project corrects the syllable count of lyrics using a Language Learning Mod
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/earl-gpt.git
+   git clone https://github.com/slee1996/earl-gpt.git
    cd earl-gpt
    ```
 
