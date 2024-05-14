@@ -2,11 +2,6 @@
 
 This project corrects the syllable count of lyrics using a Language Learning Model (LLM). It ensures that each line of the lyrics has the target number of syllables.
 
-## Prerequisites
-
-- Node.js (v14 or later)
-- NPM (v6 or later)
-
 ## Installation
 
 1. Clone the repository:
