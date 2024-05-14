@@ -6,8 +6,8 @@ This project corrects the syllable count of lyrics using a Language Learning Mod
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/lyric-correction-llm.git
-   cd lyric-correction-llm
+   git clone https://github.com/yourusername/earl-gpt.git
+   cd earl-gpt
    ```
 
 2. Install the required dependencies:
