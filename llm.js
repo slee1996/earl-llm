@@ -24,7 +24,7 @@ async function CorrectionChat({ currentSyllables, targetSyllables, lyric }) {
     messages: [
       {
         role: "user",
-        content: `Rewrite this lyric to have ${targetSyllables} syllables, it currently has ${currentSyllables}. You should return only the bars, and end each bar in a newline character. Lyric: ${lyric}`,
+        content: `Rewrite this lyric to have ${targetSyllables} syllables, it currently has ${currentSyllables}. The new lyric should rhyme with the old lyric. You should return only the bars, and end each bar in a newline character. Lyric: ${lyric}`,
       },
     ],
     model: "gpt-4o",
