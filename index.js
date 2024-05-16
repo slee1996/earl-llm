@@ -1,11 +1,26 @@
 const { phonemize } = require("phonemize");
 const { Chat, CorrectionChat } = require("./llm");
 
+const phonemeCache = {};
+
+/**
+ * Counts the number of syllables in a given text.
+ * @param {string} text - The input text.
+ * @returns {number} - The syllable count.
+ */
 function countSyllables(text) {
-  const sanitizedText = text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").toLowerCase();
+  const sanitizedText = text
+    .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
+    .toLowerCase();
+
+  if (phonemeCache[sanitizedText]) {
+    return phonemeCache[sanitizedText];
+  }
+
   const phonemes = phonemize(sanitizedText);
+
   let syllableCount = 0;
-  const vowelClusterRegex = /[aeiouɑɔɛəɨʌɪʊæ]+/gi;
+  const vowelClusterRegex = /[aeiouɑɔɛəɨʌɪʊæɝ]+/gi;
 
   phonemes.split(" ").forEach((word) => {
     const clusters = word.match(vowelClusterRegex);
@@ -16,13 +31,29 @@ function countSyllables(text) {
     }
   });
 
+  phonemeCache[sanitizedText] = syllableCount;
   return syllableCount;
 }
 
-const targetSyllablePattern = [7, 4];
-const lineLimit = 6;
+const targetSyllablePattern = [5, 10];
+const lineLimit = 8;
 
-async function chatWithLLM() {
+/**
+ * Interacts with a language model to generate and correct lyrics lines 
+ * based on a target syllable pattern and line limit.
+ * 
+ * This function first generates a set of lyrics using a language model. 
+ * It then checks each line against the specified syllable pattern. If a line 
+ * does not match the target syllable count, it uses the language model to 
+ * correct the line until it fits the pattern.
+ * 
+ * @async
+ * @function generateLyrics
+ * @returns {Promise<string[]>} A promise that resolves to an array of corrected 
+ * lyrics lines, each matching the specified syllable pattern.
+ * @throws Will throw an error if the language model interaction fails.
+ */
+async function generateLyrics() {
   const chat = await Chat({
     lineLimit,
     targetSyllables:
@@ -66,4 +97,4 @@ async function chatWithLLM() {
   return finalLyrics;
 }
 
-chatWithLLM();
+generateLyrics();

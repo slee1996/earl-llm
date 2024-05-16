@@ -5,6 +5,20 @@ const openai = new OpenAI({
   apiKey: process.env["OPENAI_API_KEY"],
 });
 
+/**
+ * Generates a set of lyrics lines using a language model, based on the provided line limit and target syllables per line.
+ *
+ * This function sends a request to the OpenAI API to create a chat completion, asking the model to compose a specified number
+ * of rap bars centered around dogs. Each bar is required to have a specific number of syllables.
+ *
+ * @async
+ * @function Chat
+ * @param {Object} params - The parameters for the chat completion request.
+ * @param {number} params.lineLimit - The number of bars (lines) to generate.
+ * @param {string} params.targetSyllables - The target syllable count for each bar.
+ * @returns {Promise<Object>} A promise that resolves to the chat completion response from the OpenAI API.
+ * @throws Will throw an error if the API request fails.
+ */
 async function Chat({ lineLimit, targetSyllables }) {
   const chatCompletion = await openai.chat.completions.create({
     messages: [
@@ -18,6 +32,21 @@ async function Chat({ lineLimit, targetSyllables }) {
   return chatCompletion;
 }
 
+/**
+ * Requests a correction of a given lyric to match a target syllable count using a language model.
+ * 
+ * This function sends a request to the OpenAI API to rewrite a lyric so that it has the specified number of syllables.
+ * The new lyric is also required to rhyme with the original one.
+ * 
+ * @async
+ * @function CorrectionChat
+ * @param {Object} params - The parameters for the chat completion request.
+ * @param {number} params.currentSyllables - The current syllable count of the lyric.
+ * @param {number} params.targetSyllables - The target syllable count for the lyric.
+ * @param {string} params.lyric - The original lyric to be corrected.
+ * @returns {Promise<Object>} A promise that resolves to the chat completion response from the OpenAI API.
+ * @throws Will throw an error if the API request fails.
+ */
 async function CorrectionChat({ currentSyllables, targetSyllables, lyric }) {
   const chatCompletion = await openai.chat.completions.create({
     messages: [
