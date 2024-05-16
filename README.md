@@ -42,7 +42,7 @@ node index.js
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/slee1996/earl-gpt/tree/main?tab=MIT-1-ov-file) file for details.
 
 ## Acknowledgements
 
