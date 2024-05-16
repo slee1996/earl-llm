@@ -21,7 +21,7 @@ This project corrects the syllable count of lyrics using a Language Learning Mod
 
 - `countSyllables(text)`: This function takes a string of text, phonemizes it, and counts the number of syllables based on vowel clusters.
 
-- `chatWithLLM()`: This asynchronous function interacts with an LLM to correct the syllable count of lyrics. It processes each line of the lyrics to ensure it meets the target syllable count.
+- `generateLyrics()`: This asynchronous function interacts with an LLM to correct the syllable count of lyrics. It processes each line of the lyrics to ensure it meets the target syllable count.
 
 ### Main Script
 
