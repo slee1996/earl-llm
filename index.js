@@ -18,17 +18,27 @@ function countSyllables(text) {
   return syllableCount;
 }
 
-const targetSyllables = 8;
+const targetSyllablePattern = [5];
+const lineLimit = 16;
 
 async function chatWithLLM() {
-  const chat = await Chat();
+  const chat = await Chat({
+    lineLimit,
+    targetSyllables:
+      targetSyllablePattern.length > 1
+        ? targetSyllablePattern.join(" or ")
+        : targetSyllablePattern,
+  });
   let finalLyrics = [];
   const lyrics = chat.choices[0].message.content
     .split("\n")
     .filter((e) => e.length > 0)
     .map((e) => e.trim());
 
-  for (const lyric of lyrics) {
+  for (let i = 0; i < lyrics.length; i++) {
+    const lyric = lyrics[i];
+    const targetSyllables =
+      targetSyllablePattern[i % targetSyllablePattern.length];
     let syllables = countSyllables(lyric);
 
     if (syllables === targetSyllables) {

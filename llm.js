@@ -5,13 +5,12 @@ const openai = new OpenAI({
   apiKey: process.env["OPENAI_API_KEY"],
 });
 
-async function Chat() {
+async function Chat({ lineLimit, targetSyllables }) {
   const chatCompletion = await openai.chat.completions.create({
     messages: [
       {
         role: "user",
-        content:
-          "Generate 8 bars for a rap song about dogs. Each bar should have 8 syllables. You should return only the bars, and end each bar in a newline character.",
+        content: `Generate ${lineLimit} bars for a rap song about dogs. Each bar should have ${targetSyllables} syllables. You should return only the bars, and end each bar in a newline character.`,
       },
     ],
     model: "gpt-4o",
