@@ -10,7 +10,7 @@ async function Chat({ lineLimit, targetSyllables }) {
     messages: [
       {
         role: "user",
-        content: `Generate ${lineLimit} bars for a rap song about dogs. Each bar should have ${targetSyllables} syllables. You should return only the bars, and end each bar in a newline character.`,
+        content: `Compose ${lineLimit} bars for a rap song centered around dogs. Ensure each bar contains exactly ${targetSyllables} syllables. Please provide only the bars, with each one ending in a newline character. Make the lyrics engaging and creative, reflecting the unique characteristics and playful nature of dogs.`,
       },
     ],
     model: "gpt-4o",
@@ -23,7 +23,9 @@ async function CorrectionChat({ currentSyllables, targetSyllables, lyric }) {
     messages: [
       {
         role: "user",
-        content: `Rewrite this lyric to have ${targetSyllables} syllables, it currently has ${currentSyllables}. The new lyric should rhyme with the old lyric. You should return only the bars, and end each bar in a newline character. Lyric: ${lyric}`,
+        content: `Rewrite this lyric to contain ${targetSyllables} syllables; it currently has ${currentSyllables} syllables. Ensure the new lyric rhymes with the old one. Return only the revised lyric, ending with a newline character.
+
+        Here is the lyric: ${lyric}`,
       },
     ],
     model: "gpt-4o",

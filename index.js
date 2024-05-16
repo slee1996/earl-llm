@@ -2,7 +2,8 @@ const { phonemize } = require("phonemize");
 const { Chat, CorrectionChat } = require("./llm");
 
 function countSyllables(text) {
-  const phonemes = phonemize(text);
+  const sanitizedText = text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").toLowerCase();
+  const phonemes = phonemize(sanitizedText);
   let syllableCount = 0;
   const vowelClusterRegex = /[aeiouɑɔɛəɨʌɪʊæ]+/gi;
 
@@ -18,8 +19,8 @@ function countSyllables(text) {
   return syllableCount;
 }
 
-const targetSyllablePattern = [5];
-const lineLimit = 16;
+const targetSyllablePattern = [7, 4];
+const lineLimit = 6;
 
 async function chatWithLLM() {
   const chat = await Chat({
@@ -42,7 +43,7 @@ async function chatWithLLM() {
     let syllables = countSyllables(lyric);
 
     if (syllables === targetSyllables) {
-      finalLyrics.push(lyric);
+      finalLyrics.push(lyric.trim());
     } else {
       while (syllables !== targetSyllables) {
         const correctedLine = await CorrectionChat({
@@ -52,8 +53,9 @@ async function chatWithLLM() {
         });
         const newLyric = correctedLine.choices[0].message.content;
         syllables = countSyllables(newLyric);
+
         if (syllables === targetSyllables) {
-          finalLyrics.push(newLyric);
+          finalLyrics.push(newLyric.trim());
           break;
         }
       }
