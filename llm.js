@@ -19,12 +19,12 @@ const openai = new OpenAI({
  * @returns {Promise<Object>} A promise that resolves to the chat completion response from the OpenAI API.
  * @throws Will throw an error if the API request fails.
  */
-async function Chat({ lineLimit, targetSyllables }) {
+async function Chat({ lineLimit, targetSyllables, meter }) {
   const chatCompletion = await openai.chat.completions.create({
     messages: [
       {
         role: "user",
-        content: `Compose ${lineLimit} bars for a rap song centered around dogs. Ensure each bar contains exactly ${targetSyllables} syllables. Please provide only the bars, with each one ending in a newline character. Make the lyrics engaging and creative, reflecting the unique characteristics and playful nature of dogs.`,
+        content: `Compose ${lineLimit} lyrics for a rap song. Limit each line to ${targetSyllables} syllables. Ensure each bar is written in this meter pattern ${meter}, with each number representing a syllable, a 0 is unstressed and a 1 is stressed.  Please provide only the lyrics, with each one ending in a newline character. Focus on maintaining a rhyme scheme. `,
       },
     ],
     model: "gpt-4o",
@@ -34,10 +34,10 @@ async function Chat({ lineLimit, targetSyllables }) {
 
 /**
  * Requests a correction of a given lyric to match a target syllable count using a language model.
- * 
+ *
  * This function sends a request to the OpenAI API to rewrite a lyric so that it has the specified number of syllables.
  * The new lyric is also required to rhyme with the original one.
- * 
+ *
  * @async
  * @function CorrectionChat
  * @param {Object} params - The parameters for the chat completion request.

@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.4.5",
+    "espeak": "^0.0.3",
     "openai": "^4.47.1",
     "phonemize": "^0.1.1"
   }
