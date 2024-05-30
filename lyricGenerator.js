@@ -4,7 +4,7 @@ const fs = require("fs").promises;
 const { detectSyllableStress } = require("./meterCheck");
 
 const targetSyllablePattern = [10];
-const meter = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0];
+const meter = [0, 1, 0, 1, 0, 1, 0, 1, 0, 1];
 const lineLimit = 16;
 
 /**
