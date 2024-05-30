@@ -59,7 +59,6 @@ function hammingDistance(meter1, meter2) {
 async function correctLyric(lyric, targetSyllables) {
   let syllables = countSyllables(lyric);
   let stress = await detectSyllableStress(lyric);
-  let meter = [/* define your meter array here */];
   let meterDistance = hammingDistance(
     meter,
     stress.map((entry) => (entry.stress === "unstressed" ? 0 : 1))

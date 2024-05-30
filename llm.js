@@ -24,11 +24,12 @@ async function Chat({ lineLimit, targetSyllables, meter }) {
     messages: [
       {
         role: "system",
-        content: "You are a generationally talented rapper named Earl who has spent years honing your skill."
+        content:
+          "You are a generationally talented rapper named Earl who has spent years honing your skill.",
       },
       {
         role: "user",
-        content: `Compose ${lineLimit} lyrics for a rap song. Limit each line to ${targetSyllables} syllables. Ensure each bar is written in this meter pattern ${meter}, with each number representing a syllable, a 0 is unstressed and a 1 is stressed. Please provide only the lyrics, with each one ending in a newline character. Focus on maintaining a rhyme scheme.`,
+        content: `Compose ${lineLimit} lyrics for a rap song. Limit each line to ${targetSyllables} syllables. Ensure each bar is written in this meter pattern ${meter.join()} (iambic pentameter), with each number representing a syllable, a 0 is unstressed and a 1 is stressed. Please provide only the lyrics, with each one ending in a newline character. Focus on maintaining a rhyme scheme.`,
       },
     ],
     model: "gpt-4o",
