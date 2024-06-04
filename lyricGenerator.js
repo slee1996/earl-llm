@@ -1,9 +1,8 @@
 const { Chat, CorrectionChat } = require("./llm");
 const { countSyllables } = require("./syllableCounter");
 const fs = require("fs").promises;
-const { detectSyllableStress } = require("./meterCheck");
+const { parseLine } = require("./meterCheck");
 
-const targetSyllablePattern = [10];
 const meter = [0, 1, 0, 1, 0, 1, 0, 1, 0, 1];
 const lineLimit = 16;
 
@@ -17,10 +16,7 @@ const lineLimit = 16;
 async function generateRawLyrics() {
   const chat = await Chat({
     lineLimit,
-    targetSyllables:
-      targetSyllablePattern.length > 1
-        ? targetSyllablePattern.join(" or ")
-        : targetSyllablePattern[0],
+    targetSyllables: meter.length,
     meter,
   });
   const lyrics = chat.choices[0].message.content
@@ -31,15 +27,8 @@ async function generateRawLyrics() {
 }
 
 function hammingDistance(meter1, meter2) {
-  // Ensure both meters are of the same length
-  if (meter1.length !== meter2.length) {
-    return 10;
-  }
-
-  // Initialize the Hamming distance
   let distance = 0;
 
-  // Calculate the Hamming distance
   for (let i = 0; i < meter1.length; i++) {
     if (meter1[i] !== meter2[i]) {
       distance++;
@@ -57,35 +46,42 @@ function hammingDistance(meter1, meter2) {
  * @returns {Promise<string>} A promise that resolves to the corrected lyric line.
  */
 async function correctLyric(lyric, targetSyllables) {
-  let syllables = countSyllables(lyric);
-  let stress = await detectSyllableStress(lyric);
-  let meterDistance = hammingDistance(
-    meter,
-    stress.map((entry) => (entry.stress === "unstressed" ? 0 : 1))
-  );
-
-  while (syllables !== targetSyllables && meterDistance >= 1) {
-    const correctedLine = await CorrectionChat({
-      targetSyllables,
-      currentSyllables: syllables,
-      lyric,
-    });
-    const newLyric = correctedLine.choices[0].message.content;
-    let newStress = await detectSyllableStress(newLyric);
-    syllables = countSyllables(newLyric);
-    meterDistance = hammingDistance(
-      meter,
-      newStress.map((entry) => (entry.stress === "unstressed" ? 0 : 1))
+  console.log(targetSyllables, lyric);
+  try {
+    let parsedLyric = await parseLine(lyric);
+    let syllables = parsedLyric.reduce(
+      (sum, item) => sum + item.syllableCount,
+      0
     );
+    let stress = parsedLyric.flatMap((i) => i.syllableStress);
 
-    if (syllables === targetSyllables && meterDistance <= 1) {
-      return newLyric.trim();
+    let meterDistance = hammingDistance(meter, stress);
+
+    while (syllables !== targetSyllables && meterDistance > 3) {
+      const correctedLine = await CorrectionChat({
+        targetSyllables,
+        currentSyllables: syllables,
+        lyric,
+        meter,
+      });
+      const newLyric = correctedLine.choices[0].message.content;
+      let newStress = await parseLine(newLyric);
+      const newSyllables = parsedLyric.reduce(
+        (sum, item) => sum + item.syllableCount,
+        0
+      );
+      const newMeterDistance = hammingDistance(meter, newStress);
+
+      if (newSyllables === targetSyllables && newMeterDistance <= 3) {
+        return newLyric.trim();
+      }
     }
+
+    return lyric.trim();
+  } catch (err) {
+    console.log(err);
   }
-
-  return lyric.trim();
 }
-
 
 /**
  * Generates and corrects lyrics lines based on a target syllable pattern and line limit.
@@ -96,21 +92,19 @@ async function correctLyric(lyric, targetSyllables) {
  */
 async function generateLyrics() {
   const rawLyrics = await generateRawLyrics();
+  await fs.writeFile("rawLyrics.txt", rawLyrics.join("\n"), "utf8");
   const finalLyrics = [];
 
   for (let i = 0; i < rawLyrics.length; i++) {
     const lyric = rawLyrics[i];
-    const targetSyllables =
-      targetSyllablePattern[i % targetSyllablePattern.length];
-    const correctedLyric = await correctLyric(lyric, targetSyllables);
+    const correctedLyric = await correctLyric(lyric, meter.length);
+
     finalLyrics.push(correctedLyric);
   }
 
-  // Convert finalLyrics array to a string with newline characters
   const finalLyricsString = finalLyrics.join("\n");
 
   try {
-    // Write the final lyrics to a file named 'finalLyrics.txt'
     await fs.writeFile("finalLyrics.txt", finalLyricsString, "utf8");
     console.log("Final lyrics have been written to finalLyrics.txt");
   } catch (err) {

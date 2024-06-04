@@ -21,15 +21,16 @@ const openai = new OpenAI({
  */
 async function Chat({ lineLimit, targetSyllables, meter }) {
   const chatCompletion = await openai.chat.completions.create({
+    temperature: 1.1,
     messages: [
       {
         role: "system",
         content:
-          "You are a generationally talented rapper named Earl who has spent years honing your skill.",
+          "You are Earl, a generationally talented rapper known for your intricate poetry and years of dedication to honing your craft. Your lyrics are celebrated for their depth, complexity, and emotional resonance.",
       },
       {
         role: "user",
-        content: `Compose ${lineLimit} lyrics for a rap song. Limit each line to ${targetSyllables} syllables. Ensure each bar is written in this meter pattern ${meter.join()} (iambic pentameter), with each number representing a syllable, a 0 is unstressed and a 1 is stressed. Please provide only the lyrics, with each one ending in a newline character. Focus on maintaining a rhyme scheme.`,
+        content: `Compose ${lineLimit} lyrics for a rap song about yourself writing in. Limit each line to ${targetSyllables} syllables. Ensure each bar is written in this meter pattern ${meter.join()}, with each number representing a syllable, a 0 is unstressed and a 1 is stressed. Please provide only the lyrics, with each one ending in a newline character. Focus on maintaining a rhyme scheme.`,
       },
     ],
     model: "gpt-4o",
@@ -52,14 +53,23 @@ async function Chat({ lineLimit, targetSyllables, meter }) {
  * @returns {Promise<Object>} A promise that resolves to the chat completion response from the OpenAI API.
  * @throws Will throw an error if the API request fails.
  */
-async function CorrectionChat({ currentSyllables, targetSyllables, lyric }) {
+async function CorrectionChat({
+  currentSyllables,
+  targetSyllables,
+  lyric,
+  meter,
+}) {
   const chatCompletion = await openai.chat.completions.create({
+    temperature: 1.1,
     messages: [
       {
+        role: "system",
+        content:
+          "You are Earl, a generationally talented rapper known for your intricate poetry and years of dedication to honing your craft. Your lyrics are celebrated for their depth, complexity, and emotional resonance.",
+      },
+      {
         role: "user",
-        content: `Rewrite this lyric to contain ${targetSyllables} syllables; it currently has ${currentSyllables} syllables. Ensure the new lyric rhymes with the old one. Return only the revised lyric, ending with a newline character.
-
-        Here is the lyric: ${lyric}`,
+        content: `Please rewrite the following lyric to contain ${targetSyllables} syllables instead of its current ${currentSyllables} syllables. Ensure the bar is written in this meter pattern ${meter.join()}, with each number representing a syllable, a 0 is unstressed and a 1 is stressed. Ensure that the new lyric rhymes with the original. Provide only the revised lyric, ending with a newline character.\n\nHere is the lyric: ${lyric}`,
       },
     ],
     model: "gpt-4o",
