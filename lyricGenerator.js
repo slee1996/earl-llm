@@ -1,5 +1,4 @@
 const { Chat, CorrectionChat } = require("./llm");
-const { countSyllables } = require("./syllableCounter");
 const fs = require("fs").promises;
 const { parseLine } = require("./meterCheck");
 

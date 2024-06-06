@@ -13,7 +13,7 @@ async function espeakUnknownWord(word) {
     let output = "";
 
     command.stdout.on("data", (data) => {
-      console.log(`Stdout: ${data}`);
+      console.log(`Stdout: ${(data)}`);
       output += data.toString("utf-8");
     });
 
