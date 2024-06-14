@@ -2,7 +2,7 @@ const { Chat, CorrectionChat } = require("./llm");
 const fs = require("fs").promises;
 const { parseLine } = require("./meterCheck");
 
-const meter = [0, 1, 0, 1, 0, 1, 0, 1, 0, 1];
+const meter = [1, 0, 0, 1, 1, 0, 0, 1];
 const lineLimit = 16;
 
 /**
@@ -45,7 +45,6 @@ function hammingDistance(meter1, meter2) {
  * @returns {Promise<string>} A promise that resolves to the corrected lyric line.
  */
 async function correctLyric(lyric, targetSyllables) {
-  console.log(targetSyllables, lyric);
   try {
     let parsedLyric = await parseLine(lyric);
     let syllables = parsedLyric.reduce(
@@ -55,20 +54,23 @@ async function correctLyric(lyric, targetSyllables) {
     let stress = parsedLyric.flatMap((i) => i.syllableStress);
 
     let meterDistance = hammingDistance(meter, stress);
+    let newLyric;
+    let newSyllables;
 
     while (syllables !== targetSyllables && meterDistance > 3) {
       const correctedLine = await CorrectionChat({
         targetSyllables,
-        currentSyllables: syllables,
-        lyric,
+        currentSyllables: newSyllables ?? syllables,
+        lyric: newLyric ?? lyric,
         meter,
       });
-      const newLyric = correctedLine.choices[0].message.content;
-      let newStress = await parseLine(newLyric);
-      const newSyllables = parsedLyric.reduce(
+      newLyric = correctedLine.choices[0].message.content;
+      let newParsedLyric = await parseLine(newLyric);
+      newSyllables = newParsedLyric.reduce(
         (sum, item) => sum + item.syllableCount,
         0
       );
+      let newStress = newParsedLyric.flatMap((i) => i.syllableStress);
       const newMeterDistance = hammingDistance(meter, newStress);
 
       if (newSyllables === targetSyllables && newMeterDistance <= 3) {
