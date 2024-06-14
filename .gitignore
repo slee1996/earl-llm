@@ -3,3 +3,4 @@ node_modules/
 finalLyrics.txt
 rawLyrics.txt
 config.json
+*.txt

@@ -2,8 +2,11 @@ const { Chat, CorrectionChat } = require("./llm");
 const fs = require("fs").promises;
 const { parseLine } = require("./meterCheck");
 
-const meter = [1, 0, 0, 1, 1, 0, 0, 1];
-const lineLimit = 16;
+const meter = [
+  [0, 1, 1, 1, 0, 1, 0, 1],
+  [1, 0, 1, 1, 1, 0, 0, 1],
+];
+const lineLimit = 12;
 
 /**
  * Generates a set of lyrics using a language model.
@@ -44,7 +47,7 @@ function hammingDistance(meter1, meter2) {
  * @param {number} targetSyllables - The target syllable count.
  * @returns {Promise<string>} A promise that resolves to the corrected lyric line.
  */
-async function correctLyric(lyric, targetSyllables) {
+async function correctLyric(lyric, targetSyllables, currentLyrics, meter) {
   try {
     let parsedLyric = await parseLine(lyric);
     let syllables = parsedLyric.reduce(
@@ -57,12 +60,13 @@ async function correctLyric(lyric, targetSyllables) {
     let newLyric;
     let newSyllables;
 
-    while (syllables !== targetSyllables && meterDistance > 3) {
+    while (meterDistance > 3) {
       const correctedLine = await CorrectionChat({
         targetSyllables,
         currentSyllables: newSyllables ?? syllables,
         lyric: newLyric ?? lyric,
         meter,
+        currentLyrics,
       });
       newLyric = correctedLine.choices[0].message.content;
       let newParsedLyric = await parseLine(newLyric);
@@ -73,7 +77,7 @@ async function correctLyric(lyric, targetSyllables) {
       let newStress = newParsedLyric.flatMap((i) => i.syllableStress);
       const newMeterDistance = hammingDistance(meter, newStress);
 
-      if (newSyllables === targetSyllables && newMeterDistance <= 3) {
+      if (newMeterDistance <= 3) {
         return newLyric.trim();
       }
     }
@@ -98,7 +102,12 @@ async function generateLyrics() {
 
   for (let i = 0; i < rawLyrics.length; i++) {
     const lyric = rawLyrics[i];
-    const correctedLyric = await correctLyric(lyric, meter.length);
+    const correctedLyric = await correctLyric(
+      lyric,
+      i % 2 === 0 ? meter[0].length : meter[1].length,
+      rawLyrics,
+      i % 2 === 0 ? meter[0] : meter[1]
+    );
 
     finalLyrics.push(correctedLyric);
   }
