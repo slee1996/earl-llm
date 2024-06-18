@@ -206,4 +206,4 @@ This project is licensed under the MIT License. See the [LICENSE](https://github
 ## Acknowledgements
 
 - [phonemize](https://www.npmjs.com/package/phonemize) for phoneme conversion.
-- Language Learning Model for providing chat and correction functionalities.
+- Language Learning Models (GPT-4o is the default option) for providing chat and correction functionalities.
