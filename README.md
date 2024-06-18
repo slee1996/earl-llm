@@ -12,9 +12,12 @@ This project corrects the syllable count of lyrics using a Language Learning Mod
    ```
 
 2. Install the required dependencies:
+
    ```bash
    npm install
    ```
+
+3. Make sure that espeak is installed. Install via Homebrew if not installed yet: https://formulae.brew.sh/formula/espeak. This project may not work on windows or linux systems.
 
 ### Main Script
 
