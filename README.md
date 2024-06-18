@@ -28,6 +28,7 @@ The main script `index.js` launches an Express app serving the following endpoin
 }
 ```
 (You can view the possible system and user prompts in the constants/index file)
+
 2. `/generate-song-with-enforcement` - Generates a song in the same process as the first endpoint, but applies a set of enforcement mechanisms to it. It will run in a loop until it satisfies the meter restrictions applied to it.
 
 ## Running the Script
