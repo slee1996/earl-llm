@@ -17,20 +17,28 @@ This project corrects the syllable count of lyrics using a Language Learning Mod
 
 ### Main Script
 
-The main script `index.js` performs the following steps:
-1. Calls the `Chat` function to get the initial lyrics.
-2. Splits the lyrics into individual lines and trims them.
-3. For each line, counts the syllables and checks if it meets the target syllable count.
-4. If the syllable count does not match, it calls `CorrectionChat` to correct the line and rechecks the syllable count.
-5. Outputs the final corrected lyrics.
+The main script `index.js` launches an Express app serving the following endpoints:
+1. `/generate-song` - This generates a song based on an array of songComponents with no enforcement mechanisms used beyond prompt engineering. A songComponent is an object in this shape: 
+```
+{
+   lineLimit: Number, //determines how many lines will be generated
+   meter: Array<Array<Number>>, //an array of arrays, the inner arrays are arrays of 1s and 0s. 1s represent a stressed syllable, 0s represent an unstressed syllable. The length of the inner arrays also determines the number of syllables to be generated per line.
+   selectedSystemPrompt: String,
+   selectedUserPrompt: String,
+}
+```
+(You can view the possible system and user prompts in the constants/index file)
+2. `/generate-song-with-enforcement` - Generates a song in the same process as the first endpoint, but applies a set of enforcement mechanisms to it. It will run in a loop until it satisfies the meter restrictions applied to it.
 
 ## Running the Script
 
 To run the script, use the following command:
 
 ```bash
-node index.js
+npm run dev
 ```
+
+This will launch the dev server at http://localhost:4000/.
 
 ## License
 

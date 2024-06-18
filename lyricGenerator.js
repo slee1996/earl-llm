@@ -2,12 +2,6 @@ const { Chat, CorrectionChat } = require("./llm");
 const fs = require("fs").promises;
 const { parseLine } = require("./meterCheck");
 
-const meter = [
-  [0, 1, 1, 1, 0, 1, 0, 1],
-  [1, 0, 1, 1, 1, 0, 0, 1],
-];
-const lineLimit = 12;
-
 /**
  * Generates a set of lyrics using a language model.
  * @async
@@ -15,7 +9,7 @@ const lineLimit = 12;
  * @returns {Promise<string[]>} A promise that resolves to an array of lyrics lines.
  * @throws Will throw an error if the language model interaction fails.
  */
-async function generateRawLyrics() {
+async function generateRawLyrics({ lineLimit, meter }) {
   const chat = await Chat({
     lineLimit,
     targetSyllables: meter.length,
@@ -47,7 +41,7 @@ function hammingDistance(meter1, meter2) {
  * @param {number} targetSyllables - The target syllable count.
  * @returns {Promise<string>} A promise that resolves to the corrected lyric line.
  */
-async function correctLyric(lyric, targetSyllables, currentLyrics, meter) {
+async function correctLyric({ lyric, targetSyllables, currentLyrics, meter }) {
   try {
     let parsedLyric = await parseLine(lyric);
     let syllables = parsedLyric.reduce(
@@ -95,8 +89,8 @@ async function correctLyric(lyric, targetSyllables, currentLyrics, meter) {
  * @returns {Promise<string[]>} A promise that resolves to an array of corrected lyrics lines.
  * @throws Will throw an error if the language model interaction fails.
  */
-async function generateLyrics() {
-  const rawLyrics = await generateRawLyrics();
+async function generateLyrics({ meter, lineLimit }) {
+  const rawLyrics = await generateRawLyrics({ meter, lineLimit });
   await fs.writeFile("rawLyrics.txt", rawLyrics.join("\n"), "utf8");
   const finalLyrics = [];
 
