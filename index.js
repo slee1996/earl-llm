@@ -54,6 +54,7 @@ app.post("/rewrite-line", async (req, res) => {
 app.get("/", async (req, res) => {
   res.send("hello world");
 });
+console.log(process.env.SSL_KEY_PATH);
 
 const options = {
   key: fs.readFileSync(process.env.SSL_KEY_PATH),
