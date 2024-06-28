@@ -47,6 +47,11 @@ app.post("/rewrite-line", async (req, res) => {
   res.end();
 });
 
+app.get("/", async (req, res) => {
+  res.write("hello world");
+  res.end();
+})
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
