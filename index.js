@@ -1,12 +1,16 @@
 require("dotenv").config();
 
 const express = require("express");
+const https = require("https");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const fs = require('fs');
 
-const { generateLyrics } = require("./lyricGenerator");
 const { generateRawLyrics } = require("./lib/lyric-generation");
-const { generateSong, generateSongWithEnforcement } = require("./api/endpoints");
+const {
+  generateSong,
+  generateSongWithEnforcement,
+} = require("./api/endpoints");
 
 const app = express();
 
@@ -14,10 +18,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4040;
 
 app.post("/generate-song", generateSong);
-app.post("/generate-song-with-enforcement", generateSongWithEnforcement)
+app.post("/generate-song-with-enforcement", generateSongWithEnforcement);
 
 app.post("/generate-verse", async (req, res) => {
   const { lineLimit, meter, selectedSystemPrompt, selectedUserPrompt } =
@@ -48,10 +52,14 @@ app.post("/rewrite-line", async (req, res) => {
 });
 
 app.get("/", async (req, res) => {
-  res.write("hello world");
-  res.end();
-})
+  res.send("hello world");
+});
 
-app.listen(PORT, () => {
+const options = {
+  key: fs.readFileSync("ssl/server.key"),
+  cert: fs.readFileSync("ssl/server.cert"),
+};
+
+https.createServer(options, app).listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
