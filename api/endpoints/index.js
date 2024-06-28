@@ -77,7 +77,7 @@ async function generateSong(req, res) {
  * @param {string} req.body.songComponents[].selectedUserPrompt - The user prompt for generating lyrics.
  * @param {Object} res - The response object.
  * @returns {Promise<void>} Responds with a JSON object containing the ordered lyrics or an error message.
- * 
+ *
  * @description
  * This function takes song components from the request body, generates raw lyrics for each component,
  * and then corrects the lyrics to match the desired meter and syllable count. If a component is a chorus,
@@ -89,7 +89,9 @@ async function generateSongWithEnforcement(req, res) {
   try {
     const { songComponents } = req.body;
     let chorus;
+    let originalChorus;
     let orderedLyrics = [];
+    let originalLyrics = [];
 
     for (const [index, component] of songComponents.entries()) {
       const { lineLimit, meter, selectedSystemPrompt, selectedUserPrompt } =
@@ -103,14 +105,16 @@ async function generateSongWithEnforcement(req, res) {
         restOfSong: orderedLyrics,
       });
       const correctedLyrics = [];
-
+      console.log(correctedLyrics);
       for (let i = 0; i < lyrics.length; i++) {
         const lyric = lyrics[i];
+        const meterIndex = i % meter.length;
+        console.log(meterIndex);
         const correctedLyric = await correctLyric({
           lyric,
-          targetSyllables: i % 2 === 0 ? meter[0].length : meter[1].length,
+          targetSyllables: meter[meterIndex].length,
           currentLyrics: orderedLyrics,
-          meter: i % 2 === 0 ? meter[0] : meter[1],
+          meter: meter[meterIndex],
           selectedSystemPrompt,
         });
         correctedLyrics.push(correctedLyric);
@@ -119,12 +123,18 @@ async function generateSongWithEnforcement(req, res) {
       if (selectedUserPrompt.toLowerCase() === "chorus") {
         if (!chorus) {
           chorus = correctedLyrics;
+          originalChorus = lyrics;
         }
         orderedLyrics[index] = { component: "chorus", lyrics: chorus };
+        originalLyrics[index] = { component: "chorus", lyrics: originalChorus };
       } else {
         orderedLyrics[index] = {
           component: selectedUserPrompt.toLowerCase(),
           lyrics: correctedLyrics,
+        };
+        originalLyrics[index] = {
+          component: selectedUserPrompt.toLowerCase(),
+          lyrics,
         };
       }
     }
@@ -169,7 +179,7 @@ async function correctLyric({
     let newLyric;
     let newSyllables;
 
-    while (meterDistance > 3) {
+    while (meterDistance > 2) {
       const correctedLine = await CorrectionChat({
         targetSyllables,
         currentSyllables: newSyllables ?? syllables,
@@ -187,7 +197,7 @@ async function correctLyric({
       let newStress = newParsedLyric.flatMap((i) => i.syllableStress);
       const newMeterDistance = hammingDistance(meter, newStress);
 
-      if (newMeterDistance <= 3) {
+      if (newMeterDistance <= 2) {
         return newLyric.trim();
       }
     }

@@ -1,0 +1,55 @@
+{
+  "songComponents": [
+    {
+      "lineLimit": 8,
+      "meter": [
+        [0, 1, 0, 1],
+        [0, 1, 0, 1]
+      ],
+      "selectedSystemPrompt": "rapper",
+      "selectedUserPrompt": "VERSE"
+    },
+    {
+      "lineLimit": 4,
+      "meter": [[0, 1, 0, 1]],
+      "selectedSystemPrompt": "rapper",
+      "selectedUserPrompt": "CHORUS"
+    },
+    {
+      "lineLimit": 8,
+      "meter": [
+        [0, 1, 0, 1, 1, 0, 1, 0],
+        [0, 1, 1, 0]
+      ],
+      "selectedSystemPrompt": "rapper",
+      "selectedUserPrompt": "VERSE"
+    },
+    {
+      "lineLimit": 8,
+      "meter": [
+        [0, 1, 0, 1, 1],
+        [0, 1, 0, 1, 0, 1]
+      ],
+      "selectedSystemPrompt": "rapper",
+      "selectedUserPrompt": "CHORUS"
+    },
+    {
+      "lineLimit": 6,
+      "meter": [
+        [0, 1, 0, 1],
+        [0, 1, 0, 1, 0, 1]
+      ],
+      "selectedSystemPrompt": "rapper",
+      "selectedUserPrompt": "VERSE"
+    },
+    {
+      "lineLimit": 8,
+      "meter": [
+        [0, 1, 0, 1, 1],
+        [0, 1, 0, 1, 0, 1]
+      ],
+      "selectedSystemPrompt": "rapper",
+      "selectedUserPrompt": "CHORUS"
+    }
+  ]
+}

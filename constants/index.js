@@ -34,7 +34,7 @@ module.exports = {
         role: "user",
         content: `As a hit-making songwriter, compose ${lineLimit} lines of catchy, accessible verse lyrics that will have listeners singing along in no time. Each line should follow this meter: ${meterString}, where 0 is an unstressed syllable and 1 is stressed. Use your verses to bring the story to life, letting characters share their feelings, or highlight the song's main idea in a fun, relatable way. Paint pictures with your words, using comparisons and clever turns of phrase to draw people in and make them feel like they're right there in the song. Rhymes, internal rhymes, and other poetic tricks can make your verses even catchier and more memorable. Each verse should build on the last, adding new meaning and keeping things interesting from start to finish.${
           restOfSong.length > 1
-            ? `Here is the rest of the song for context: ${restOfSong
+            ? ` Here is the rest of the song for context: ${restOfSong
                 .map((component) => {
                   return [component.component, ...component.lyrics];
                 })
@@ -43,26 +43,24 @@ module.exports = {
         } Return only the lyrics of the new verse, with each line ending in a newline.`,
       };
     },
-    CHORUS: (lineLimit, meterString, restOfSong) => ({
-      role: "user",
-      content: `As an accomplished songwriter, compose a captivating, catchy, and memorable chorus consisting of ${lineLimit} lines. Each line should adhere to the following meter: ${meterString}, where 0 represents an unstressed syllable, and 1 represents a stressed syllable. Craft your chorus lyrics to be the emotional and thematic centerpiece of the song, using powerful imagery, figurative language, and catchy phrasing to create a hook that resonates with listeners and encourages them to sing along. Consider incorporating rhyme, repetition, and other lyrical techniques to enhance the impact and memorability of the chorus.${
-        restOfSong.length > 1
-          ? `Here is the rest of the song for context: ${restOfSong
-              .map((component) => {
-                return [component.component, ...component.lyrics];
-              })
-              .join(
-                "\n"
-              )} Do not return anything but the lyrics of the new chorus, with each line ending in a newline.`
-          : ""
-      }`,
-    }),
+    CHORUS: (lineLimit, meterString, restOfSong) => {
+      return {
+        role: "user",
+        content: `As an accomplished songwriter, compose a captivating, catchy, and memorable chorus consisting of ${lineLimit} lines. Each line should adhere to the following meter: ${meterString}, where 0 represents an unstressed syllable, and 1 represents a stressed syllable. Craft your chorus lyrics to be the emotional and thematic centerpiece of the song, using powerful imagery, figurative language, and catchy phrasing to create a hook that resonates with listeners and encourages them to sing along. Consider incorporating rhyme, repetition, and other lyrical techniques to enhance the impact and memorability of the chorus.${
+          restOfSong.length > 1
+            ? ` Here is the rest of the song for context: ${restOfSong
+                .map((component) => {
+                  return [component.component, ...component.lyrics];
+                })
+                .join("\n")}`
+            : ""
+        } Do not return anything but the lyrics of the new chorus, with each line ending in a newline.`,
+      };
+    },
     BRIDGE: (lineLimit, meterString) => ({
       role: "user",
       content: `As a skilled songwriter, compose a compelling bridge section with ${lineLimit} lines that adds depth, a fresh perspective, or an unexpected twist to the song's narrative. Each line should follow this meter: ${meterString}, where 0 represents an unstressed syllable and 1 represents a stressed syllable. Use your bridge to introduce a new melodic or lyrical idea, a shift in emotional tone, or a surprising revelation that complements the verses and chorus while maintaining the song's overall theme. Employ creative wordplay, vivid imagery, and evocative language to engage the listener and create a memorable moment in the song. The bridge should serve as a natural transition between the chorus and the final verse or outro, seamlessly connecting the song's various elements. Please provide only the bridge lyrics, with each line ending in a newline character, ensuring clarity in the structure and flow of the bridge section.`,
     }),
   },
-  REGEXPS: {
-
-  }
+  REGEXPS: {},
 };
