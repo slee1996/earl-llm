@@ -4,7 +4,7 @@ const express = require("express");
 const https = require("https");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const fs = require('fs');
+const fs = require("fs");
 
 const { generateRawLyrics } = require("./lib/lyric-generation");
 const {
@@ -56,8 +56,8 @@ app.get("/", async (req, res) => {
 });
 
 const options = {
-  key: fs.readFileSync("ssl/server.key"),
-  cert: fs.readFileSync("ssl/server.cert"),
+  key: fs.readFileSync(process.env.SSL_KEY_PATH),
+  cert: fs.readFileSync(process.env.SSL_CERT_PATH),
 };
 
 https.createServer(options, app).listen(PORT, () => {
