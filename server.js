@@ -1,10 +1,8 @@
 require("dotenv").config();
 
 const express = require("express");
-const https = require("https");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const fs = require("fs");
 
 const { generateRawLyrics } = require("./lib/lyric-generation");
 const {
@@ -54,13 +52,7 @@ app.post("/rewrite-line", async (req, res) => {
 app.get("/", async (req, res) => {
   res.send("hello world");
 });
-console.log(process.env);
 
-const options = {
-  key: fs.readFileSync(process.env.SSL_KEY_PATH),
-  cert: fs.readFileSync(process.env.SSL_CERT_PATH),
-};
-
-https.createServer(options, app).listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

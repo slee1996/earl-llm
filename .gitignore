@@ -5,3 +5,7 @@ rawLyrics.txt
 config.json
 *.txt
 ssl/
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
