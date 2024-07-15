@@ -17,7 +17,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
-const PORT = process.env.PORT || 4040;
+const PORT = process.env.PORT || 4000;
 
 app.post("/generate-song", generateSong);
 app.post("/generate-song-with-enforcement", generateSongWithEnforcement);
@@ -54,6 +54,6 @@ app.get("/", async (req, res) => {
   res.send("hello world");
 });
 
-https.createServer(app).listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
