@@ -93,7 +93,8 @@ async function generateSongWithEnforcement(req, res) {
     let orderedLyrics = [];
     let originalLyrics = [];
 
-    for (const [index, component] of songComponents.entries()) {
+    // Parallelize lyric generation and correction
+    const generateAndCorrectLyrics = async (component, index) => {
       const { lineLimit, meter, selectedSystemPrompt, selectedUserPrompt } =
         component;
 
@@ -104,21 +105,19 @@ async function generateSongWithEnforcement(req, res) {
         selectedUserPrompt,
         restOfSong: orderedLyrics,
       });
-      const correctedLyrics = [];
-      console.log(correctedLyrics);
-      for (let i = 0; i < lyrics.length; i++) {
-        const lyric = lyrics[i];
-        const meterIndex = i % meter.length;
-        console.log(meterIndex);
-        const correctedLyric = await correctLyric({
-          lyric,
-          targetSyllables: meter[meterIndex].length,
-          currentLyrics: orderedLyrics,
-          meter: meter[meterIndex],
-          selectedSystemPrompt,
-        });
-        correctedLyrics.push(correctedLyric);
-      }
+
+      const correctedLyrics = await Promise.all(
+        lyrics.map(async (lyric, i) => {
+          const meterIndex = i % meter.length;
+          return await correctLyric({
+            lyric,
+            targetSyllables: meter[meterIndex].length,
+            currentLyrics: orderedLyrics,
+            meter: meter[meterIndex],
+            selectedSystemPrompt,
+          });
+        })
+      );
 
       if (selectedUserPrompt.toLowerCase() === "chorus") {
         if (!chorus) {
@@ -137,7 +136,9 @@ async function generateSongWithEnforcement(req, res) {
           lyrics,
         };
       }
-    }
+    };
+
+    await Promise.all(songComponents.map(generateAndCorrectLyrics));
 
     res.status(200).json(orderedLyrics);
   } catch (error) {
@@ -145,6 +146,51 @@ async function generateSongWithEnforcement(req, res) {
     res
       .status(500)
       .json({ error: "An error occurred while generating the song" });
+  }
+}
+
+async function correctLyric({
+  lyric,
+  targetSyllables,
+  currentLyrics,
+  meter,
+  selectedSystemPrompt,
+}) {
+  try {
+    const parseLyric = async (lyric) => {
+      const parsed = await parseLine(lyric);
+      return {
+        syllables: parsed.reduce((sum, item) => sum + item.syllableCount, 0),
+        stress: parsed.flatMap((i) => i.syllableStress),
+      };
+    };
+
+    let { syllables, stress } = await parseLyric(lyric);
+    let meterDistance = hammingDistance(meter, stress);
+    let newLyric = lyric;
+    let newSyllables = syllables;
+
+    while (meterDistance > 2) {
+      const correctedLine = await CorrectionChat({
+        targetSyllables,
+        currentSyllables: newSyllables,
+        lyric: newLyric,
+        meter,
+        currentLyrics,
+        selectedSystemPrompt,
+      });
+
+      newLyric = correctedLine.choices[0].message.content.trim();
+      const parsedLyric = await parseLyric(newLyric);
+      newSyllables = parsedLyric.syllables;
+      const newStress = parsedLyric.stress;
+      meterDistance = hammingDistance(meter, newStress);
+    }
+
+    return newLyric;
+  } catch (err) {
+    console.log(err);
+    return lyric.trim();
   }
 }
 
@@ -160,50 +206,50 @@ function hammingDistance(meter1, meter2) {
   return distance;
 }
 
-async function correctLyric({
-  lyric,
-  targetSyllables,
-  currentLyrics,
-  meter,
-  selectedSystemPrompt,
-}) {
-  try {
-    let parsedLyric = await parseLine(lyric);
-    let syllables = parsedLyric.reduce(
-      (sum, item) => sum + item.syllableCount,
-      0
-    );
-    let stress = parsedLyric.flatMap((i) => i.syllableStress);
+// async function correctLyric({
+//   lyric,
+//   targetSyllables,
+//   currentLyrics,
+//   meter,
+//   selectedSystemPrompt,
+// }) {
+//   try {
+//     let parsedLyric = await parseLine(lyric);
+//     let syllables = parsedLyric.reduce(
+//       (sum, item) => sum + item.syllableCount,
+//       0
+//     );
+//     let stress = parsedLyric.flatMap((i) => i.syllableStress);
 
-    let meterDistance = hammingDistance(meter, stress);
-    let newLyric;
-    let newSyllables;
+//     let meterDistance = hammingDistance(meter, stress);
+//     let newLyric;
+//     let newSyllables;
 
-    while (meterDistance > 2) {
-      const correctedLine = await CorrectionChat({
-        targetSyllables,
-        currentSyllables: newSyllables ?? syllables,
-        lyric: newLyric ?? lyric,
-        meter,
-        currentLyrics,
-        selectedSystemPrompt,
-      });
-      newLyric = correctedLine.choices[0].message.content;
-      let newParsedLyric = await parseLine(newLyric);
-      newSyllables = newParsedLyric.reduce(
-        (sum, item) => sum + item.syllableCount,
-        0
-      );
-      let newStress = newParsedLyric.flatMap((i) => i.syllableStress);
-      const newMeterDistance = hammingDistance(meter, newStress);
+//     while (meterDistance > 2) {
+//       const correctedLine = await CorrectionChat({
+//         targetSyllables,
+//         currentSyllables: newSyllables ?? syllables,
+//         lyric: newLyric ?? lyric,
+//         meter,
+//         currentLyrics,
+//         selectedSystemPrompt,
+//       });
+//       newLyric = correctedLine.choices[0].message.content;
+//       let newParsedLyric = await parseLine(newLyric);
+//       newSyllables = newParsedLyric.reduce(
+//         (sum, item) => sum + item.syllableCount,
+//         0
+//       );
+//       let newStress = newParsedLyric.flatMap((i) => i.syllableStress);
+//       const newMeterDistance = hammingDistance(meter, newStress);
 
-      if (newMeterDistance <= 2) {
-        return newLyric.trim();
-      }
-    }
+//       if (newMeterDistance <= 2) {
+//         return newLyric.trim();
+//       }
+//     }
 
-    return lyric.trim();
-  } catch (err) {
-    console.log(err);
-  }
-}
+//     return lyric.trim();
+//   } catch (err) {
+//     console.log(err);
+//   }
+// }
