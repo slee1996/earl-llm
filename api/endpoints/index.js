@@ -95,7 +95,7 @@ async function generateSong(req, res) {
  */
 async function generateSongWithEnforcement(req, res) {
   try {
-    const { songComponents } = req.body;
+    const { songComponents, songTitle, songDescription } = req.body;
     let chorus;
     let originalChorus;
     let orderedLyrics = [];
@@ -103,8 +103,13 @@ async function generateSongWithEnforcement(req, res) {
 
     // Parallelize lyric generation and correction
     const generateAndCorrectLyrics = async (component, index) => {
-      const { lineLimit, meter, selectedSystemPrompt, selectedUserPrompt } =
-        component;
+      const {
+        lineLimit,
+        meter,
+        selectedSystemPrompt,
+        selectedUserPrompt,
+        customSystemPrompt,
+      } = component;
 
       const lyrics = await generateRawLyrics({
         lineLimit,
@@ -112,6 +117,9 @@ async function generateSongWithEnforcement(req, res) {
         selectedSystemPrompt,
         selectedUserPrompt,
         restOfSong: orderedLyrics,
+        customSystemPrompt: customSystemPrompt ?? "",
+        songTitle: songTitle ?? "",
+        songDescription: songDescription ?? "",
       });
 
       const correctedLyrics = await Promise.all(
