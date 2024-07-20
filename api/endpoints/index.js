@@ -25,13 +25,18 @@ module.exports = {
  */
 async function generateSong(req, res) {
   try {
-    const { songComponents } = req.body;
+    const { songComponents, songTitle, songDescription } = req.body;
     let chorus;
     let orderedLyrics = [];
 
     for (const [index, component] of songComponents.entries()) {
-      const { lineLimit, meter, selectedSystemPrompt, selectedUserPrompt } =
-        component;
+      const {
+        lineLimit,
+        meter,
+        selectedSystemPrompt,
+        selectedUserPrompt,
+        customSystemPrompt,
+      } = component;
 
       const lyrics = await generateRawLyrics({
         lineLimit,
@@ -39,6 +44,9 @@ async function generateSong(req, res) {
         selectedSystemPrompt,
         selectedUserPrompt,
         restOfSong: orderedLyrics,
+        customSystemPrompt: customSystemPrompt ?? "",
+        songTitle: songTitle ?? "",
+        songDescription: songDescription ?? "",
       });
 
       if (selectedUserPrompt.toLowerCase() === "chorus") {
