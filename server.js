@@ -2,7 +2,6 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
-const https = require("https");
 const bodyParser = require("body-parser");
 
 const { generateRawLyrics } = require("./lib/lyric-generation");
