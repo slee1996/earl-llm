@@ -1,12 +1,6 @@
 const { spawn } = require("child_process");
 
-const phonemeCache = {};
-
-async function espeakUnknownWord(word) {
-  if (phonemeCache[word]) {
-    return phonemeCache[word];
-  }
-
+async function espeakUnknownWord(word, phonemeCache) {
   return new Promise((resolve, reject) => {
     const command = spawn("espeak", [word, "-x", "-q"]);
 

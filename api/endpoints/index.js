@@ -101,7 +101,6 @@ async function generateSongWithEnforcement(req, res) {
     let orderedLyrics = [];
     let originalLyrics = [];
 
-    // Parallelize lyric generation and correction
     const generateAndCorrectLyrics = async (component, index) => {
       const {
         lineLimit,
@@ -210,14 +209,15 @@ async function correctLyric({
   }
 }
 
-function hammingDistance(meter1, meter2) {
+function hammingDistance(intendedMeter, currentMeter) {
   let distance = 0;
 
-  for (let i = 0; i < meter1.length; i++) {
-    if (meter1[i] !== meter2[i]) {
+  for (let i = 0; i < currentMeter.length; i++) {
+    if (intendedMeter[i] !== currentMeter[i]) {
       distance++;
     }
   }
 
   return distance;
 }
+

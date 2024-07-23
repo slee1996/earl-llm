@@ -6,7 +6,7 @@ const vowelClusterRegex = /[ˈˌaeiouɑɔɛəɨʌɪʊæɝ]+/gi;
 const combinedRegex = /([ˈˌ]?[^\sˈˌ]+|[aeiouɑɔɛəɨʌɪʊæɝ]+)/gi;
 const stressMarkers = {
   ˈ: 1,
-  ˌ: 0,
+  ˌ: 1,
   "": 0,
 };
 const phonemeCache = {};
@@ -39,11 +39,15 @@ async function parseLine(textStr) {
       .replace(/[^\p{L}\p{N}\s']/gu, "")
       .toLowerCase()
       .split(" ");
+
     const phonemes = await Promise.all(
       words.map(async (str) => {
+        console.log(phonemeCache)
         const phoneme = phonemeCache[str] ?? (await phonemize(str));
         phonemeCache[str] = phoneme;
-        return phoneme === str ? await espeakUnknownWord(str) : phoneme;
+        return phoneme === str
+          ? await espeakUnknownWord(str, phonemeCache)
+          : phoneme;
       })
     );
 
