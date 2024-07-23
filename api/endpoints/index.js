@@ -25,7 +25,8 @@ module.exports = {
  */
 async function generateSong(req, res) {
   try {
-    const { songComponents, songTitle, songDescription } = req.body;
+    const { songComponents, songTitle, songDescription, clientChoice } =
+      req.body;
     let chorus;
     let orderedLyrics = [];
 
@@ -47,6 +48,7 @@ async function generateSong(req, res) {
         customSystemPrompt: customSystemPrompt ?? "",
         songTitle: songTitle ?? "",
         songDescription: songDescription ?? "",
+        clientChoice,
       });
 
       if (selectedUserPrompt.toLowerCase() === "chorus") {
@@ -95,7 +97,8 @@ async function generateSong(req, res) {
  */
 async function generateSongWithEnforcement(req, res) {
   try {
-    const { songComponents, songTitle, songDescription } = req.body;
+    const { songComponents, songTitle, songDescription, clientChoice } =
+      req.body;
     let chorus;
     let originalChorus;
     let orderedLyrics = [];
@@ -119,6 +122,7 @@ async function generateSongWithEnforcement(req, res) {
         customSystemPrompt: customSystemPrompt ?? "",
         songTitle: songTitle ?? "",
         songDescription: songDescription ?? "",
+        clientChoice,
       });
 
       const correctedLyrics = await Promise.all(
@@ -220,4 +224,3 @@ function hammingDistance(intendedMeter, currentMeter) {
 
   return distance;
 }
-
