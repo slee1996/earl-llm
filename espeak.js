@@ -7,7 +7,6 @@ async function espeakUnknownWord(word, phonemeCache) {
     let output = "";
 
     command.stdout.on("data", (data) => {
-      console.log(`Stdout: ${(data)}`);
       output += data.toString("utf-8");
     });
 
@@ -21,7 +20,6 @@ async function espeakUnknownWord(word, phonemeCache) {
     });
 
     command.on("close", (code) => {
-      console.log(`Child process exited with code ${code}`);
       if (code === 0) {
         const cleanedOutput = output.replace(/[\n\r]/g, "").trim();
         phonemeCache[word] = cleanedOutput; // Cache the result

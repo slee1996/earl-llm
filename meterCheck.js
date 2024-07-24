@@ -42,7 +42,6 @@ async function parseLine(textStr) {
 
     const phonemes = await Promise.all(
       words.map(async (str) => {
-        console.log(phonemeCache)
         const phoneme = phonemeCache[str] ?? (await phonemize(str));
         phonemeCache[str] = phoneme;
         return phoneme === str
