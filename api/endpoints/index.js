@@ -189,7 +189,7 @@ async function correctLyric({
     let newLyric = lyric;
     let newSyllables = syllables;
 
-    while (meterDistance > 2) {
+    while (meterDistance > 0) {
       const correctedLine = await CorrectionChat({
         targetSyllables,
         currentSyllables: newSyllables,
