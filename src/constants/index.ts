@@ -1,7 +1,6 @@
-require("dotenv").config();
-const openai = require("../../llm-clients/openaiClientExport");
+import { SystemPrompts, UserPrompts } from "../types";
 
-const SYSTEM_PROMPTS = {
+const SYSTEM_PROMPTS: SystemPrompts = {
   rapper: `Character: Earl, the Rap Prodigy
 
   Description:
@@ -30,118 +29,64 @@ const SYSTEM_PROMPTS = {
   electropopStar:
     "You are Localghost, a groundbreaking electropop artist renowned for your futuristic sound, cutting-edge visuals, and thought-provoking lyrics that push the boundaries of the genre. Your music is a kaleidoscopic fusion of electronic beats, synthesizers, and ethereal vocals, creating an immersive and avant-garde experience that captivates audiences worldwide.   As Localghost, your creative vision is driven by a deep fascination with technology, science fiction, and the limitless possibilities of the future. You draw inspiration from cutting-edge innovations, exploring themes of artificial intelligence, virtual reality, and the evolving relationship between humans and machines. Your lyrics are a reflection of your unique perspective, challenging listeners to question their assumptions and embrace the unknown.   When crafting your songs, focus on creating tracks that are both sonically and thematically revolutionary. Use inventive production techniques, unconventional song structures, and experimental sound design to create a truly original and unforgettable listening experience. Collaborate with visionary producers, artists, and visual designers to bring your concepts to life, pushing the boundaries of what is possible in the realm of pop music.   Your music is characterized by its sleek, high-tech sound, combining pulsing bass lines, glitchy beats, and shimmering synths with your distinctive vocal style. Embrace the power of technology in your creative process, using cutting-edge software and hardware to manipulate sound and create new, never-before-heard textures and rhythms.   As Localghost, your goal is to create pop music that not only entertains but also inspires and challenges your listeners. You strive to be a pioneer in the genre, constantly evolving your sound and vision to stay ahead of the curve. Through your music, you aim to create a sense of wonder and possibility, encouraging your fans to dream big, embrace change, and boldly step into the future.",
 };
-const USER_PROMPTS = {
-  VERSE: (lineLimit, meterString) => ({
-    role: "user",
-    content: `As a hit-making songwriter, compose ${lineLimit} lines of catchy, accessible verse lyrics that will have listeners singing along in no time. Each line should follow this meter: ${meterString}, where 0 is an unstressed syllable and 1 is stressed. Use your verses to bring the story to life, letting characters share their feelings, or highlight the song's main idea in a fun, relatable way. Paint pictures with your words, using comparisons and clever turns of phrase to draw people in and make them feel like they're right there in the song. Rhymes, internal rhymes, and other poetic tricks can make your verses even catchier and more memorable. Each verse should build on the last, adding new meaning and keeping things interesting from start to finish. Give me just the verse lyrics, with each line ending in a newline, creating a clear, easy-to-follow structure that will have people grooving along with the chorus.`,
-  }),
-  CHORUS: (lineLimit, meterString) => ({
-    role: "user",
-    content: `As an accomplished songwriter, compose a captivating, catchy, and memorable chorus consisting of ${lineLimit} lines. Each line should adhere to the following meter: ${meterString}, where 0 represents an unstressed syllable, and 1 represents a stressed syllable. Craft your chorus lyrics to be the emotional and thematic centerpiece of the song, using powerful imagery, figurative language, and catchy phrasing to create a hook that resonates with listeners and encourages them to sing along. Consider incorporating rhyme, repetition, and other lyrical techniques to enhance the impact and memorability of the chorus. Please provide only the chorus lyrics, with each line ending in a newline character, ensuring that the structure and flow of the chorus are clear and easy to follow.`,
-  }),
-  BRIDGE: (lineLimit, meterString) => ({
-    role: "user",
-    content: `As a skilled songwriter, compose a compelling bridge section with ${lineLimit} lines that adds depth, a fresh perspective, or an unexpected twist to the song's narrative. Each line should follow this meter: ${meterString}, where 0 represents an unstressed syllable and 1 represents a stressed syllable. Use your bridge to introduce a new melodic or lyrical idea, a shift in emotional tone, or a surprising revelation that complements the verses and chorus while maintaining the song's overall theme. Employ creative wordplay, vivid imagery, and evocative language to engage the listener and create a memorable moment in the song. The bridge should serve as a natural transition between the chorus and the final verse or outro, seamlessly connecting the song's various elements. Please provide only the bridge lyrics, with each line ending in a newline character, ensuring clarity in the structure and flow of the bridge section.`,
-  }),
+
+const USER_PROMPTS: UserPrompts = {
+  VERSE: ({
+    lineLimit,
+    meterString,
+    restOfSong,
+    songTitle,
+    songDescription,
+  }) => {
+    return {
+      role: "user",
+      content: `${songTitle.length > 0 ? `SONG TITLE: ${songTitle}` : ""}
+     ${songDescription.length > 0 ? `SONG DESCRIPTION: ${songDescription}` : ""}
+      As a hit-making songwriter, compose ${lineLimit} lines of catchy, accessible verse lyrics that will have listeners singing along in no time. Each line should follow the prescribed meter, where 0 is an unstressed syllable and 1 is stressed. ${meterString} Use your verses to bring the story to life, letting characters share their feelings, or highlight the song's main idea in a fun, relatable way. Paint pictures with your words, using comparisons and clever turns of phrase to draw people in and make them feel like they're right there in the song. Rhymes, internal rhymes, and other poetic tricks can make your verses even catchier and more memorable. Each verse should build on the last, adding new meaning and keeping things interesting from start to finish.${
+        restOfSong.length > 1
+          ? ` Here is the rest of the song for context: ${restOfSong
+              .map((component) => {
+                return [component.component, ...component.lyrics];
+              })
+              .join("\n")}`
+          : ""
+      } Return only the lyrics of the new verse, with each line ending in a newline.`,
+    };
+  },
+  CHORUS: ({
+    lineLimit,
+    meterString,
+    restOfSong,
+    songTitle,
+    songDescription,
+  }) => {
+    return {
+      role: "user",
+      content: `${songTitle.length > 0 ? `SONG TITLE: ${songTitle}` : ""}
+     ${
+       songDescription.length > 0 ? `SONG DESCRIPTION: ${songDescription}` : ""
+     } As an accomplished songwriter, compose a captivating, catchy, and memorable chorus consisting of ${lineLimit} lines. Each line should follow the prescribed meter, where 0 is an unstressed syllable and 1 is stressed. ${meterString} Craft your chorus lyrics to be the emotional and thematic centerpiece of the song, using powerful imagery, figurative language, and catchy phrasing to create a hook that resonates with listeners and encourages them to sing along. Consider incorporating rhyme, repetition, and other lyrical techniques to enhance the impact and memorability of the chorus.${
+        restOfSong.length > 1
+          ? ` Here is the rest of the song for context: ${restOfSong
+              .map((component) => {
+                return [component.component, ...component.lyrics];
+              })
+              .join("\n")}`
+          : ""
+      } Do not return anything but the lyrics of the new chorus, with each line ending in a newline.`,
+    };
+  },
+  BRIDGE: ({ lineLimit, meterString, songTitle, songDescription }) => {
+    return {
+      role: "user",
+      content: `${songTitle.length > 0 ? `SONG TITLE: ${songTitle}` : ""}
+     ${
+       songDescription.length > 0 ? `SONG DESCRIPTION: ${songDescription}` : ""
+     } As a skilled songwriter, compose a compelling bridge section with ${lineLimit} lines that adds depth, a fresh perspective, or an unexpected twist to the song's narrative. Each line should follow the prescribed meter, where 0 is an unstressed syllable and 1 is stressed. ${meterString} Use your bridge to introduce a new melodic or lyrical idea, a shift in emotional tone, or a surprising revelation that complements the verses and chorus while maintaining the song's overall theme. Employ creative wordplay, vivid imagery, and evocative language to engage the listener and create a memorable moment in the song. The bridge should serve as a natural transition between the chorus and the final verse or outro, seamlessly connecting the song's various elements. Please provide only the bridge lyrics, with each line ending in a newline character, ensuring clarity in the structure and flow of the bridge section.`,
+    };
+  },
 };
-const SELECTED_SYSTEM_PROMPT = SYSTEM_PROMPTS.electropopStar;
-const SELECTED_USER_PROMPT = USER_PROMPTS.VERSE;
 
-/**
- * Generates a set of lyrics lines using a language model, based on the provided line limit and target syllables per line.
- *
- * This function sends a request to the OpenAI API to create a chat completion, asking the model to compose a specified number
- * of rap bars centered around dogs. Each bar is required to have a specific number of syllables.
- *
- * @async
- * @function Chat
- * @param {Object} params - The parameters for the chat completion request.
- * @param {number} params.lineLimit - The number of bars (lines) to generate.
- * @param {string} params.targetSyllables - The target syllable count for each bar.
- * @returns {Promise<Object>} A promise that resolves to the chat completion response from the OpenAI API.
- * @throws Will throw an error if the API request fails.
- */
-async function Chat({ lineLimit, meter }) {
-  try {
-    const meterString = `Make sure to use an alternating meter pattern. One line will use this pattern: ${meter[0].join()} and have ${
-      meter[0].length
-    } syllables. The next line will use this pattern: ${meter[1].join()} and have ${
-      meter[1].length
-    } syllables`;
-    const chatCompletion = await openai.chat.completions.create({
-      temperature: 1.2,
-      messages: [
-        {
-          role: "system",
-          content: SELECTED_SYSTEM_PROMPT,
-        },
-        SELECTED_USER_PROMPT(lineLimit, meterString),
-      ],
-      model: "gpt-4o",
-    });
-    return chatCompletion;
-  } catch (err) {
-    console.log(err);
-  }
-}
+const REGEXPS: Record<string, RegExp> = {};
 
-/**
- * Requests a correction of a given lyric to match a target syllable count using a language model.
- *
- * This function sends a request to the OpenAI API to rewrite a lyric so that it has the specified number of syllables.
- * The new lyric is also required to rhyme with the original one.
- *
- * @async
- * @function CorrectionChat
- * @param {Object} params - The parameters for the chat completion request.
- * @param {number} params.currentSyllables - The current syllable count of the lyric.
- * @param {number} params.targetSyllables - The target syllable count for the lyric.
- * @param {string} params.lyric - The original lyric to be corrected.
- * @returns {Promise<Object>} A promise that resolves to the chat completion response from the OpenAI API.
- * @throws Will throw an error if the API request fails.
- */
-async function CorrectionChat({
-  currentSyllables,
-  targetSyllables,
-  lyric,
-  meter,
-  currentLyrics,
-  selectedSystemPrompt,
-}) {
-  try {
-    const chatCompletion = await openai.chat.completions.create({
-      temperature: 1.2,
-      messages: [
-        {
-          role: "system",
-          content: SYSTEM_PROMPTS[selectedSystemPrompt],
-        },
-        {
-          role: "user",
-          content: `As a skilled lyricist, please revise the following lyric to contain exactly ${targetSyllables} syllables, as it currently has ${currentSyllables} syllables. When rewriting, ensure that the revised lyric follows this specific meter pattern: ${meter.join()}, where 0 represents an unstressed syllable and 1 represents a stressed syllable. Maintain the original rhyme scheme and preserve the overall meaning and intent of the lyric provided. Focus on making the necessary adjustments to the number of syllables while maintaining the artistic integrity of the piece.
-          
-          Lyric to revise: ${lyric}
-
-          ${
-            currentLyrics.length > 1
-              ? `Here is the rest of the song for context: ${currentLyrics
-                  .map((component) => {
-                    return [component.component, ...component.lyrics];
-                  })
-                  .join("\n")}`
-              : ""
-          } Return only the revised lyric, ending with a newline character.`,
-        },
-      ],
-      model: "gpt-4o",
-    });
-    return chatCompletion;
-  } catch (err) {
-    console.log(err);
-  }
-}
-
-module.exports = {
-  Chat,
-  CorrectionChat,
-};
+export { SYSTEM_PROMPTS, USER_PROMPTS, REGEXPS };

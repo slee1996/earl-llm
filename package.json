@@ -1,12 +1,12 @@
 {
   "name": "earl-gpt",
   "version": "1.0.0",
-  "description": "",
+  "description": "This project corrects the syllable count of lyrics using a Language Learning Model (LLM). It ensures that each line of the lyrics has the target number of syllables.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon"
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsc -w"
   },
   "keywords": [],
   "author": "",
@@ -22,5 +22,13 @@
     "openai": "^4.47.1",
     "phonemize": "^0.1.1",
     "replicate": "^0.32.0"
+  },
+  "devDependencies": {
+    "@types/body-parser": "^1.19.5",
+    "@types/cors": "^2.8.17",
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.1.0",
+    "typescript": "^5.5.4"
   }
 }

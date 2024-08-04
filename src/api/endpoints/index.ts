@@ -1,34 +1,20 @@
-const { generateRawLyrics } = require("../../lib/lyric-generation");
-const { parseLine } = require("../../meterCheck");
-const { CorrectionChat } = require("../../lib/llm");
+import { Request, Response } from "express";
+import { generateRawLyrics } from "../../lib/lyric-generation";
+import { parseLine } from "../../lib/metric-parsing";
+import { CorrectionChat } from "../../lib/llm";
+import {
+  SongComponent,
+  SongGenerationRequest,
+  CorrectionParams,
+  LyricComponent,
+} from "../../types";
 
-module.exports = {
-  generateSong,
-  generateSongWithEnforcement,
-};
-
-/**
- * Asynchronously generates a song based on the provided song components and returns the ordered lyrics.
- *
- * @async
- * @function generateSong
- * @param {Object} req - The request object.
- * @param {Object} req.body - The body of the request containing song components.
- * @param {Array} req.body.songComponents - An array of song components, each containing details for lyric generation.
- * @param {number} req.body.songComponents[].lineLimit - The limit on the number of lines for this component.
- * @param {Array<Array<Number>>} req.body.songComponents[].meter - The meter of the lyrics to be generated. An array of 1s and 0s. 1 corresponds to a stressed syllable, 0 corresponds to an unstressed syllable
- * @param {string} req.body.songComponents[].selectedSystemPrompt - The system prompt for generating lyrics.
- * @param {string} req.body.songComponents[].selectedUserPrompt - The user prompt for generating lyrics.
- * @param {Object} res - The response object.
- * @returns {Promise<void>} Responds with a JSON object containing the ordered lyrics or an error message.
- * @throws {Error} Will throw an error if lyric generation fails.
- */
-async function generateSong(req, res) {
+export async function generateSong(req: Request, res: Response): Promise<void> {
   try {
     const { songComponents, songTitle, songDescription, clientChoice } =
-      req.body;
-    let chorus;
-    let orderedLyrics = [];
+      req.body as SongGenerationRequest;
+    let chorus: string[] | undefined;
+    let orderedLyrics: LyricComponent[] = [];
 
     for (const [index, component] of songComponents.entries()) {
       const {
@@ -73,38 +59,22 @@ async function generateSong(req, res) {
   }
 }
 
-/**
- * Asynchronously generates a song based on the provided song components and returns the ordered lyrics.
- *
- * @async
- * @function generateSongWithEnforcement
- * @param {Object} req - The request object.
- * @param {Object} req.body - The body of the request containing song components.
- * @param {Array} req.body.songComponents - An array of song components, each containing details for lyric generation.
- * @param {number} req.body.songComponents[].lineLimit - The limit on the number of lines for this component.
- * @param {Array<Array<Number>>} req.body.songComponents[].meter - The meter of the lyrics to be generated. An array of 1s and 0s. 1 corresponds to a stressed syllable, 0 corresponds to an unstressed syllable
- * @param {string} req.body.songComponents[].selectedSystemPrompt - The system prompt for generating lyrics.
- * @param {string} req.body.songComponents[].selectedUserPrompt - The user prompt for generating lyrics.
- * @param {Object} res - The response object.
- * @returns {Promise<void>} Responds with a JSON object containing the ordered lyrics or an error message.
- *
- * @description
- * This function takes song components from the request body, generates raw lyrics for each component,
- * and then corrects the lyrics to match the desired meter and syllable count. If a component is a chorus,
- * it is reused for subsequent chorus components. The final ordered lyrics are sent in the response.
- *
- * @throws {Error} Will throw an error if lyric generation fails.
- */
-async function generateSongWithEnforcement(req, res) {
+export async function generateSongWithEnforcement(
+  req: Request,
+  res: Response
+): Promise<void> {
   try {
     const { songComponents, songTitle, songDescription, clientChoice } =
-      req.body;
-    let chorus;
-    let originalChorus;
-    let orderedLyrics = [];
-    let originalLyrics = [];
+      req.body as SongGenerationRequest;
+    let chorus: string[] | undefined;
+    let originalChorus: string[] | undefined;
+    let orderedLyrics: LyricComponent[] = [];
+    let originalLyrics: LyricComponent[] = [];
 
-    const generateAndCorrectLyrics = async (component, index) => {
+    const generateAndCorrectLyrics = async (
+      component: SongComponent,
+      index: number
+    ) => {
       const {
         lineLimit,
         meter,
@@ -144,7 +114,10 @@ async function generateSongWithEnforcement(req, res) {
           originalChorus = lyrics;
         }
         orderedLyrics[index] = { component: "chorus", lyrics: chorus };
-        originalLyrics[index] = { component: "chorus", lyrics: originalChorus };
+        originalLyrics[index] = {
+          component: "chorus",
+          lyrics: originalChorus!,
+        };
       } else {
         orderedLyrics[index] = {
           component: selectedUserPrompt.toLowerCase(),
@@ -174,9 +147,9 @@ async function correctLyric({
   currentLyrics,
   meter,
   selectedSystemPrompt,
-}) {
+}: CorrectionParams): Promise<string> {
   try {
-    const parseLyric = async (lyric) => {
+    const parseLyric = async (lyric: string) => {
       const parsed = await parseLine(lyric);
       return {
         syllables: parsed.reduce((sum, item) => sum + item.syllableCount, 0),
@@ -199,11 +172,13 @@ async function correctLyric({
         selectedSystemPrompt,
       });
 
-      newLyric = correctedLine.choices[0].message.content.trim();
-      const parsedLyric = await parseLyric(newLyric);
-      newSyllables = parsedLyric.syllables;
-      const newStress = parsedLyric.stress;
-      meterDistance = hammingDistance(meter, newStress);
+      if (correctedLine && correctedLine.choices[0].message.content) {
+        newLyric = correctedLine.choices[0].message.content.trim();
+        const parsedLyric = await parseLyric(newLyric);
+        newSyllables = parsedLyric.syllables;
+        const newStress = parsedLyric.stress;
+        meterDistance = hammingDistance(meter, newStress);
+      }
     }
 
     return newLyric;
@@ -213,7 +188,10 @@ async function correctLyric({
   }
 }
 
-function hammingDistance(intendedMeter, currentMeter) {
+function hammingDistance(
+  intendedMeter: number[],
+  currentMeter: number[]
+): number {
   let distance = 0;
 
   for (let i = 0; i < currentMeter.length; i++) {
