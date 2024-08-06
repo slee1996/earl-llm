@@ -20,7 +20,7 @@ export interface UserPromptParams {
 }
 
 interface ArbitraryUserPromptParams extends UserPromptParams {
-  arbitraryPrompt: string;
+  arbitraryPrompt?: string;
 }
 
 export interface UserPrompts {
