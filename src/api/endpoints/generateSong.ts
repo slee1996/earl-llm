@@ -1,15 +1,12 @@
 import { Request, Response } from "express";
 import { generateRawLyrics } from "../../lib/lyric-generation";
-import {
-  SongGenerationRequest,
-  LyricComponent,
-} from "../../types";
+import { SongGenerationRequest, LyricComponent } from "../../types";
 
 export async function generateSong(req: Request, res: Response): Promise<void> {
   try {
     const { songComponents, songTitle, songDescription, clientChoice } =
       req.body as SongGenerationRequest;
-    let chorus: string[] | undefined;
+    let choruses: { [key: number]: string[] } = {};
     let orderedLyrics: LyricComponent[] = [];
 
     for (const [index, component] of songComponents.entries()) {
@@ -21,24 +18,37 @@ export async function generateSong(req: Request, res: Response): Promise<void> {
         customSystemPrompt,
       } = component;
 
-      const lyrics = await generateRawLyrics({
-        lineLimit,
-        meter,
-        selectedSystemPrompt,
-        selectedUserPrompt,
-        restOfSong: orderedLyrics,
-        customSystemPrompt: customSystemPrompt ?? "",
-        songTitle: songTitle ?? "",
-        songDescription: songDescription ?? "",
-        clientChoice,
-      });
-
       if (selectedUserPrompt.toLowerCase() === "chorus") {
-        if (!chorus) {
-          chorus = lyrics;
+        if (!choruses[lineLimit]) {
+          const lyrics = await generateRawLyrics({
+            lineLimit,
+            meter,
+            selectedSystemPrompt,
+            selectedUserPrompt,
+            restOfSong: orderedLyrics,
+            customSystemPrompt: customSystemPrompt ?? "",
+            songTitle: songTitle ?? "",
+            songDescription: songDescription ?? "",
+            clientChoice,
+          });
+          choruses[lineLimit] = lyrics;
         }
-        orderedLyrics[index] = { component: "chorus", lyrics: chorus };
+        orderedLyrics[index] = {
+          component: "chorus",
+          lyrics: choruses[lineLimit],
+        };
       } else {
+        const lyrics = await generateRawLyrics({
+          lineLimit,
+          meter,
+          selectedSystemPrompt,
+          selectedUserPrompt,
+          restOfSong: orderedLyrics,
+          customSystemPrompt: customSystemPrompt ?? "",
+          songTitle: songTitle ?? "",
+          songDescription: songDescription ?? "",
+          clientChoice,
+        });
         orderedLyrics[index] = {
           component: selectedUserPrompt.toLowerCase(),
           lyrics,
