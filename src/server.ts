@@ -2,7 +2,11 @@ import dotenv from "dotenv";
 import express, { Request, Response } from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
-import { generateSong, generateSongWithEnforcement } from "./api/endpoints";
+import {
+  createSongStructure,
+  generateSong,
+  generateSongWithEnforcement,
+} from "./api/endpoints";
 
 dotenv.config();
 
@@ -40,9 +44,10 @@ const PORT = process.env.PORT || 4000;
 
 app.post("/generate-song", generateSong);
 app.post("/generate-song-with-enforcement", generateSongWithEnforcement);
+app.post("/create-song-structure", createSongStructure);
 
 // @ts-expect-error
-app.get("/", (req: Request, res: Response) => {
+app.get("/", async (req: Request, res: Response) => {
   console.log("Route handler called");
   console.log("res type:", typeof res);
   console.log("res constructor name:", res.constructor.name);
@@ -52,12 +57,10 @@ app.get("/", (req: Request, res: Response) => {
   );
 
   if (typeof res.send === "function") {
-    res.writeHead(200, { "Content-Type": "text/plain" });
-    res.send("hello world");
+    res.status(200).json("hello there");
   } else {
     console.error("res.send is not a function");
 
-    res.writeHead(200, { "Content-Type": "text/plain" });
     res.end("hello world!");
   }
 });

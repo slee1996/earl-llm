@@ -6,7 +6,7 @@ import { CorrectionChatParams } from "../../types";
 
 dotenv.config();
 
-async function CorrectionChat({
+async function correctionChat({
   currentSyllables,
   targetSyllables,
   lyric,
@@ -48,4 +48,4 @@ async function CorrectionChat({
   }
 }
 
-export { CorrectionChat };
+export { correctionChat };

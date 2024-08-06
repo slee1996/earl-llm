@@ -19,10 +19,21 @@ export interface UserPromptParams {
   songDescription: string;
 }
 
+interface ArbitraryUserPromptParams extends UserPromptParams {
+  arbitraryPrompt: string;
+}
+
 export interface UserPrompts {
   VERSE: (params: UserPromptParams) => { role: string; content: string };
   CHORUS: (params: UserPromptParams) => { role: string; content: string };
   BRIDGE: (params: Omit<UserPromptParams, "restOfSong">) => {
+    role: string;
+    content: string;
+  };
+  OUTRO: (params: UserPromptParams) => { role: string; content: string };
+  INTRO: (params: UserPromptParams) => { role: string; content: string };
+  PRECHORUS: (params: UserPromptParams) => { role: string; content: string };
+  ARBITRARY: (params: ArbitraryUserPromptParams) => {
     role: string;
     content: string;
   };
