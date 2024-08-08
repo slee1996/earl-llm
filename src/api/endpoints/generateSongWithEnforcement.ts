@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { generateRawLyrics } from "../../lib/lyric-generation";
-import { parseLyric } from "../../lib/utils";
+import { parseAndFormatLyric } from "../../lib/utils";
 import { correctionChat } from "../../lib/llm";
 import {
   SongComponent,
@@ -32,6 +32,7 @@ export async function generateSongWithEnforcement(
         selectedSystemPrompt,
         selectedUserPrompt,
         customSystemPrompt,
+        rhymeScheme,
       } = component;
 
       const lyrics = await generateRawLyrics({
@@ -44,6 +45,7 @@ export async function generateSongWithEnforcement(
         songTitle: songTitle ?? "",
         songDescription: songDescription ?? "",
         clientChoice,
+        rhymeScheme: rhymeScheme ?? "",
       });
 
       const correctedLyrics = await Promise.all(
@@ -100,7 +102,7 @@ async function correctLyric({
   selectedSystemPrompt,
 }: CorrectionParams): Promise<string> {
   try {
-    let { syllables, stress } = await parseLyric(lyric);
+    let { syllables, stress } = await parseAndFormatLyric(lyric);
     let meterDistance = hammingDistance(meter, stress);
     let newLyric = lyric;
     let newSyllables = syllables;
@@ -117,7 +119,7 @@ async function correctLyric({
 
       if (correctedLine && correctedLine.choices[0].message.content) {
         newLyric = correctedLine.choices[0].message.content.trim();
-        const parsedLyric = await parseLyric(newLyric);
+        const parsedLyric = await parseAndFormatLyric(newLyric);
         newSyllables = parsedLyric.syllables;
         const newStress = parsedLyric.stress;
         meterDistance = hammingDistance(meter, newStress);

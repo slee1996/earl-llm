@@ -14,6 +14,7 @@ export function createChatObject({
   restOfSong,
   songTitle,
   songDescription,
+  rhymeScheme
 }: ChatObjectParams) {
   const systemContent =
     customSystemPrompt.length > 0
@@ -26,6 +27,7 @@ export function createChatObject({
     restOfSong,
     songTitle,
     songDescription,
+    rhymeScheme
   } as UserPromptParams);
 
   switch (clientChoice) {

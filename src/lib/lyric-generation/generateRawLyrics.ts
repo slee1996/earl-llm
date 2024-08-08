@@ -11,6 +11,7 @@ async function generateRawLyrics({
   songTitle,
   songDescription,
   clientChoice = "anthropic",
+  rhymeScheme
 }: RawLyricsOptions): Promise<string[]> {
   try {
     const meterString = meter
@@ -39,6 +40,7 @@ async function generateRawLyrics({
       restOfSong,
       songTitle,
       songDescription,
+      rhymeScheme
     });
 
     switch (clientChoice) {

@@ -48,14 +48,6 @@ app.post("/create-song-structure", createSongStructure);
 
 // @ts-expect-error
 app.get("/", async (req: Request, res: Response) => {
-  console.log("Route handler called");
-  console.log("res type:", typeof res);
-  console.log("res constructor name:", res.constructor.name);
-  console.log(
-    "res methods:",
-    Object.getOwnPropertyNames(Object.getPrototypeOf(res))
-  );
-
   if (typeof res.send === "function") {
     res.status(200).json("hello there");
   } else {

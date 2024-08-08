@@ -20,11 +20,11 @@ export async function createSongStructure(
       res.status(400).json({ error: "Invalid songLyrics format" });
       return;
     }
-    console.log(songLyrics);
+
     const songStructure = await constructSongStructure({
       incomingSong: songLyrics,
     });
-    console.log(songStructure);
+
     res.status(200).json({ songStructure });
   } catch (error) {
     console.error("Error in createSongStructure:", error);

@@ -17,6 +17,7 @@ export interface UserPromptParams {
   restOfSong: LyricComponent[];
   songTitle: string;
   songDescription: string;
+  rhymeScheme: string;
 }
 
 interface ArbitraryUserPromptParams extends UserPromptParams {
@@ -45,6 +46,7 @@ export interface SongComponent {
   selectedSystemPrompt: keyof SystemPrompts;
   selectedUserPrompt: keyof UserPrompts;
   customSystemPrompt?: string;
+  rhymeScheme: string;
 }
 
 export interface SongGenerationRequest {
@@ -52,6 +54,7 @@ export interface SongGenerationRequest {
   songTitle?: string;
   songDescription?: string;
   clientChoice?: "anthropic" | "openai" | "llama";
+  rhymeScheme?: string;
 }
 
 export interface RawLyricsOptions extends SongComponent {
@@ -60,6 +63,7 @@ export interface RawLyricsOptions extends SongComponent {
   songTitle: string;
   songDescription: string;
   clientChoice?: "anthropic" | "openai" | "llama";
+  rhymeScheme: string;
 }
 
 export interface CorrectionParams {
@@ -91,6 +95,7 @@ export interface ChatObjectParams {
   restOfSong: LyricComponent[];
   songTitle: string;
   songDescription: string;
+  rhymeScheme?: string;
 }
 
 export interface PhonemeData {

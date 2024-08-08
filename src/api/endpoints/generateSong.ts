@@ -16,6 +16,7 @@ export async function generateSong(req: Request, res: Response): Promise<void> {
         selectedSystemPrompt,
         selectedUserPrompt,
         customSystemPrompt,
+        rhymeScheme,
       } = component;
 
       if (selectedUserPrompt.toLowerCase() === "chorus") {
@@ -30,6 +31,7 @@ export async function generateSong(req: Request, res: Response): Promise<void> {
             songTitle: songTitle ?? "",
             songDescription: songDescription ?? "",
             clientChoice,
+            rhymeScheme: rhymeScheme ?? "",
           });
           choruses[lineLimit] = lyrics;
         }
@@ -48,6 +50,7 @@ export async function generateSong(req: Request, res: Response): Promise<void> {
           songTitle: songTitle ?? "",
           songDescription: songDescription ?? "",
           clientChoice,
+          rhymeScheme: rhymeScheme ?? "",
         });
         orderedLyrics[index] = {
           component: selectedUserPrompt.toLowerCase(),
