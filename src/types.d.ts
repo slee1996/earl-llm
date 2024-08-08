@@ -54,7 +54,6 @@ export interface SongGenerationRequest {
   songTitle?: string;
   songDescription?: string;
   clientChoice?: "anthropic" | "openai" | "llama";
-  rhymeScheme?: string;
 }
 
 export interface RawLyricsOptions extends SongComponent {
